@@ -5,7 +5,7 @@ trigger:
       - release
       - main/*
 pool:
-  vmImage: 'Default'
+  name: 'Default'
 
 pr:
   branches:
