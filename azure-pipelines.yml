@@ -4,6 +4,8 @@ trigger:
       - develop
       - release
       - main/*
+pool:
+  vmImage: 'Default'
 
 pr:
   branches:
@@ -26,8 +28,6 @@ stages:
   jobs:
   - job: SecurityAndBuild
     displayName: 'Compile, Audit & Scan React App'
-    pool:
-      vmImage: 'Default'
 
     steps:
     # 1. Setup Node.js
