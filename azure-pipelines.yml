@@ -1,7 +1,148 @@
-trigger: none 
-pool: Default
+trigger:
+  branches:
+    include:
+      - develop
+      - release
+      - main/*
 
-steps: 
-- task: CmdLine@2
-  inputs:
-    script: 'echo "Hello World"'
+pr:
+  branches:
+    include:
+      - develop
+      - main
+
+variables:
+  - name: NODE_VERSION
+    value: '20.x'
+  - name: BUILD_OUTPUT_PATH
+    value: '$(System.DefaultWorkingDirectory)/build'
+
+stages:
+# ========================================================
+# STAGE 1: BUILD & DEVSECOPS SECURITY SCANNING
+# ========================================================
+- stage: BuildAndSecurityScan
+  displayName: 'Build & DevSecOps Security Scan'
+  jobs:
+  - job: SecurityAndBuild
+    displayName: 'Compile, Audit & Scan React App'
+    pool:
+      vmImage: 'Default'
+
+    steps:
+    # 1. Setup Node.js
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '$(NODE_VERSION)'
+      displayName: 'Install Node.js'
+
+#     # 2. Secret Scanning using Gitleaks
+#     - script: |
+#         docker run --rm -v $(System.DefaultWorkingDirectory):/path zricethezav/gitleaks:latest detect --source="/path" -v
+#       displayName: 'DevSecOps: Secret Scanning (Gitleaks)'
+
+#     # 3. Dependency Scanning (SCA) - NPM Audit
+#     - script: |
+#         npm ci
+#         npm audit --audit-level=high
+#       displayName: 'DevSecOps: SCA Dependency Audit (NPM Audit)'
+#       continueOnError: false
+
+#     # 4. SAST Code Scanning (ESLint Security Plugin & SonarQube)
+#     - task: SonarQubePrepare@5
+#       inputs:
+#         SonarQube: 'SonarQube-ServiceConnection'
+#         scannerMode: 'CLI'
+#         configMode: 'manual'
+#         cliProjectKey: 'react-app-gitflow'
+#         cliSources: 'src'
+
+#     # 5. Build React Application with Environment Variables
+#     - script: |
+#         # Pass build parameters based on source branch
+#         if [ "$(Build.SourceBranchName)" == "develop" ]; then
+#           export REACT_APP_API_URL="https://api-dev.yourdomain.com"
+#         elif [[ "$(Build.SourceBranch)" == refs/heads/release/* ]]; then
+#           export REACT_APP_API_URL="https://api-staging.yourdomain.com"
+#         else
+#           export REACT_APP_API_URL="https://api.yourdomain.com"
+#         fi
+
+#         npm run build
+#       displayName: 'Compile React Production Bundle'
+
+#     # 6. Publish SonarQube Results
+#     - task: SonarQubeAnalyze@5
+#     - task: SonarQubePublish@5
+#       inputs:
+#         pollingTimeoutSec: '300'
+
+#     # 7. Publish Build Artifact
+#     - task: PublishBuildArtifacts@1
+#       inputs:
+#         PathtoPublish: '$(BUILD_OUTPUT_PATH)'
+#         ArtifactName: 'react-dist-package'
+#         publishLocation: 'Container'
+
+# # ========================================================
+# # STAGE 2: DEPLOY TO DEV ENVIRONMENT
+# # ========================================================
+# - stage: DeployToDev
+#   displayName: 'Deploy to DEV VM'
+#   dependsOn: BuildAndSecurityScan
+#   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+#   jobs:
+#   - deployment: DeployDev
+#     environment: 'DEV-VM-Environment'
+#     pool:
+#       vmImage: 'ubuntu-latest'
+#     strategy:
+#       runOnce:
+#         deploy:
+#           steps:
+#           - template: templates/deploy-steps.yml
+#             parameters:
+#               sshEndpoint: 'DEV-VM-SSH-ServiceConnection'
+#               deployPath: '/var/www/react-app-dev'
+
+# # ========================================================
+# # STAGE 3: DEPLOY TO STAGING ENVIRONMENT
+# # ========================================================
+# - stage: DeployToStaging
+#   displayName: 'Deploy to STAGING VM'
+#   dependsOn: BuildAndSecurityScan
+#   condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/release'))
+#   jobs:
+#   - deployment: DeployStaging
+#     environment: 'STAGING-VM-Environment'
+#     pool:
+#       vmImage: 'ubuntu-latest'
+#     strategy:
+#       runOnce:
+#         deploy:
+#           steps:
+#           - template: templates/deploy-steps.yml
+#             parameters:
+#               sshEndpoint: 'STAGING-VM-SSH-ServiceConnection'
+#               deployPath: '/var/www/react-app-staging'
+
+# # ========================================================
+# # STAGE 4: DEPLOY TO PRODUCTION ENVIRONMENT
+# # ========================================================
+# - stage: DeployToProduction
+#   displayName: 'Deploy to PROD VM'
+#   dependsOn: BuildAndSecurityScan
+#   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+#   jobs:
+#   - deployment: DeployProduction
+#     environment: 'PROD-VM-Environment' # Enforces manual approval gate in Azure DevOps UI
+#     pool:
+#       vmImage: 'ubuntu-latest'
+#     strategy:
+#       runOnce:
+#         deploy:
+#           steps:
+#           - template: templates/deploy-steps.yml
+#             parameters:
+#               sshEndpoint: 'PROD-VM-SSH-ServiceConnection'
+#               deployPath: '/var/www/react-app-prod'
