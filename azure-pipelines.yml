@@ -4,4 +4,4 @@ pool: Default
 steps: 
 - task: CmdLine@2
   inputs:
-    script: 'Write-Host "Hello World"'
+    script: 'echo "Hello World"'
