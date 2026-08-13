@@ -56,13 +56,11 @@ stages:
           
               # 5. Verify installation
               gitleaks version
+          
+               # 6. Run locally
+              ./gitleaks detect --source . --verbose
     
-    # - task: CmdLine@2
-    #   displayName: 'DevSecOps: Secret Scanning (Gitleaks via Docker)'
-    #   continueOnError: true
-    #   inputs:
-    #     script: |
-    #       docker run --rm -v $(System.DefaultWorkingDirectory):/path zricethezav/gitleaks:latest detect --source="/path" -v
+
     - task: CmdLine@2
       displayName: 'Run Gitleaks'
       continueOnError: true
