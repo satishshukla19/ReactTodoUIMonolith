@@ -18,6 +18,8 @@ variables:
     value: '20.x'
   - name: BUILD_OUTPUT_PATH
     value: '$(System.DefaultWorkingDirectory)/build'
+  - name: PACKAGE_VERSION
+    value: '1.0.$(Build.BuildId)' # Automatically increments version per build
 
 stages:
 # ========================================================
@@ -35,6 +37,15 @@ stages:
       inputs:
         versionSpec: '$(NODE_VERSION)'
       displayName: 'Install Node.js'
+    
+
+    # 1. Build your React app
+    - task: CmdLine@2
+      displayName: 'Build React Application'
+      inputs:
+        script: |
+          npm ci
+          npm run build
 
     # 2. Secret Scanning using Gitleaks
     - task: CmdLine@2
@@ -104,7 +115,7 @@ stages:
     - task: PublishBuildArtifacts@1
       inputs:
         PathtoPublish: '$(BUILD_OUTPUT_PATH)'
-        ArtifactName: 'react-dist-package'
+        ArtifactName: 'react-frontend-app'
         publishLocation: 'Container'
 
 # # ========================================================
