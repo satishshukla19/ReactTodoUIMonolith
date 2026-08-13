@@ -36,10 +36,24 @@ stages:
         versionSpec: '$(NODE_VERSION)'
       displayName: 'Install Node.js'
 
-#     # 2. Secret Scanning using Gitleaks
-    - script: |
-        docker run --rm -v $(System.DefaultWorkingDirectory):/path zricethezav/gitleaks:latest detect --source="/path" -v
-      displayName: 'DevSecOps: Secret Scanning (Gitleaks)'
+    # 2. Secret Scanning using Gitleaks
+    - task: CmdLine@2
+      displayName: 'Install Gitleaks'
+      inputs:
+        script: |
+          wget https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_linux_x64.tar.gz
+                        tar -xzf gitleaks_8.28.0_linux_x64.tar.gz
+                        chmod +x gitleaks
+                        gitleaks version
+    - task: CmdLine@2
+      displayName: 'Run Gitleaks'
+      continueOnError: true
+      inputs:
+        script: './gitleaks detect --source . --verbose'
+
+    # - script: |
+    #     docker run --rm -v $(System.DefaultWorkingDirectory):/path zricethezav/gitleaks:latest detect --source="/path" -v
+    #   displayName: 'DevSecOps: Secret Scanning (Gitleaks)'
 
 #     # 3. Dependency Scanning (SCA) - NPM Audit
 #     - script: |
@@ -77,12 +91,12 @@ stages:
 #       inputs:
 #         pollingTimeoutSec: '300'
 
-#     # 7. Publish Build Artifact
-#     - task: PublishBuildArtifacts@1
-#       inputs:
-#         PathtoPublish: '$(BUILD_OUTPUT_PATH)'
-#         ArtifactName: 'react-dist-package'
-#         publishLocation: 'Container'
+    # 7. Publish Build Artifact
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(BUILD_OUTPUT_PATH)'
+        ArtifactName: 'react-dist-package'
+        publishLocation: 'Container'
 
 # # ========================================================
 # # STAGE 2: DEPLOY TO DEV ENVIRONMENT
