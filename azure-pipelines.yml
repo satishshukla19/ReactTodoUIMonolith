@@ -31,15 +31,15 @@ stages:
 
     steps:
     # 1. Setup Node.js
-    - task: NodeTool@0
+    - task: NodeTool@1
       inputs:
         versionSpec: '$(NODE_VERSION)'
       displayName: 'Install Node.js'
 
 #     # 2. Secret Scanning using Gitleaks
-#     - script: |
-#         docker run --rm -v $(System.DefaultWorkingDirectory):/path zricethezav/gitleaks:latest detect --source="/path" -v
-#       displayName: 'DevSecOps: Secret Scanning (Gitleaks)'
+    - script: |
+        docker run --rm -v $(System.DefaultWorkingDirectory):/path zricethezav/gitleaks:latest detect --source="/path" -v
+      displayName: 'DevSecOps: Secret Scanning (Gitleaks)'
 
 #     # 3. Dependency Scanning (SCA) - NPM Audit
 #     - script: |
