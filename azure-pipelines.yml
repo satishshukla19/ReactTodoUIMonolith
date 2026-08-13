@@ -39,20 +39,30 @@ stages:
     # 2. Secret Scanning using Gitleaks
     - task: CmdLine@2
       displayName: 'Install Gitleaks'
-      continueOnError: true
+      # continueOnError: true
       inputs:
         script: |
-          wget https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_linux_x64.tar.gz
-          tar -xzf gitleaks_8.28.0_linux_x64.tar.gz
-          chmod +x gitleaks
-          gitleaks version
+          # 1. Download Gitleaks tarball
+              wget https://github.com/gitleaks/gitleaks/releases/download/v8.18.0/gitleaks_8.18.0_linux_x64.tar.gz
+          
+              # 2. Extract the binary
+              tar -zxvf gitleaks_8.18.0_linux_x64.tar.gz
+          
+              # 3. Move binary to system PATH so it can be called anywhere
+              sudo mv gitleaks /usr/local/bin/
+          
+              # 4. Give execution permissions
+              sudo chmod +x /usr/local/bin/gitleaks
+          
+              # 5. Verify installation
+              gitleaks version
     
-    - task: CmdLine@2
-      displayName: 'DevSecOps: Secret Scanning (Gitleaks via Docker)'
-      continueOnError: true
-      inputs:
-        script: |
-          docker run --rm -v $(System.DefaultWorkingDirectory):/path zricethezav/gitleaks:latest detect --source="/path" -v
+    # - task: CmdLine@2
+    #   displayName: 'DevSecOps: Secret Scanning (Gitleaks via Docker)'
+    #   continueOnError: true
+    #   inputs:
+    #     script: |
+    #       docker run --rm -v $(System.DefaultWorkingDirectory):/path zricethezav/gitleaks:latest detect --source="/path" -v
     - task: CmdLine@2
       displayName: 'Run Gitleaks'
       continueOnError: true
