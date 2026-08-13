@@ -67,7 +67,7 @@ stages:
     # 3. Dependency Scanning (SCA) - NPM Audit
     - script: |
         npm ci
-        nnpm audit --audit-level=critical
+        npm audit --audit-level=critical
       displayName: 'DevSecOps: SCA Dependency Audit (NPM Audit)'
       continueOnError: false
 
