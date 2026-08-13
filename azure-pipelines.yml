@@ -63,14 +63,11 @@ stages:
       inputs:
         script: 'gitleaks detect --source . --verbose'
 
-    # - script: |
-    #     docker run --rm -v $(System.DefaultWorkingDirectory):/path zricethezav/gitleaks:latest detect --source="/path" -v
-    #   displayName: 'DevSecOps: Secret Scanning (Gitleaks)'
 
     # 3. Dependency Scanning (SCA) - NPM Audit
     - script: |
         npm ci
-        npm audit --audit-level=high
+        nnpm audit --audit-level=critical
       displayName: 'DevSecOps: SCA Dependency Audit (NPM Audit)'
       continueOnError: false
 
